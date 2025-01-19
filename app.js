@@ -1,156 +1,216 @@
 // IndexedDB setup
-const dbName = 'patientDB';
-const dbVersion = 1;
 let db;
+const request = indexedDB.open('patientDB', 1);
 
-const openDatabase = () => {
-    const request = indexedDB.open(dbName, dbVersion);
+request.onupgradeneeded = function(event) {
+    db = event.target.result;
+    const objectStore = db.createObjectStore('patients', { keyPath: 'id', autoIncrement: true });
+    objectStore.createIndex('name', 'name', { unique: false });
+};
 
-    request.onupgradeneeded = (event) => {
-        db = event.target.result;
-        if (!db.objectStoreNames.contains('patients')) {
-            db.createObjectStore('patients', { keyPath: 'id', autoIncrement: true });
+request.onsuccess = function(event) {
+    db = event.target.result;
+    displayPatients();
+};
+
+request.onerror = function(event) {
+    showErrorNotification("Database error: " + event.target.errorCode);
+};
+
+// Add patient function
+const addPatient = event => {
+    event.preventDefault();
+
+    const name = document.getElementById('name').value;
+    const age = parseInt(document.getElementById('age').value);
+    const disease = document.getElementById('disease').value;
+
+    const transaction = db.transaction(['patients'], 'readwrite');
+    const objectStore = transaction.objectStore('patients');
+    const request = objectStore.add({ name, age, disease });
+
+    request.onsuccess = () => {
+        showNotification(`Patient ${name} added successfully.`);
+        displayPatients();
+    };
+
+    request.onerror = event => {
+        showErrorNotification("Add patient error: " + event.target.errorCode);
+    };
+
+    event.target.reset();
+};
+
+// Display patients function
+const displayPatients = () => {
+    const patientList = document.getElementById('patientList');
+    patientList.innerHTML = '';
+
+    const transaction = db.transaction('patients', 'readonly');
+    const objectStore = transaction.objectStore('patients');
+    const request = objectStore.openCursor();
+
+    request.onsuccess = event => {
+        const cursor = event.target.result;
+        if (cursor) {
+            const listItem = document.createElement('li');
+            listItem.textContent = `Name: ${cursor.value.name}, Age: ${cursor.value.age}, Disease: ${cursor.value.disease}`;
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = "Delete";
+            deleteButton.className = "button";
+            deleteButton.onclick = () => deletePatient(cursor.value.id);
+            listItem.appendChild(deleteButton);
+            patientList.appendChild(listItem);
+            cursor.continue();
         }
     };
 
-    request.onsuccess = (event) => {
-        db = event.target.result;
-        loadPatients();
-    };
-
-    request.onerror = (event) => {
-        showMessage('Error opening database.', true);
+    request.onerror = event => {
+        showErrorNotification("Display patients error: " + event.target.errorCode);
     };
 };
 
-// Function to show toast message
-const showToast = (message, type = 'success') => {
-    const toastContainer = document.getElementById('toastContainer');
-    
-    // Create a new toast element
-    const toast = document.createElement('div');
-    toast.classList.add('toast', type);
-    toast.innerText = message;
-
-    // Append toast to the container
-    toastContainer.appendChild(toast);
-
-    // Remove the toast after 3 seconds
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-};
-
-// Add patient to IndexedDB
-const addPatient = () => {
-    const name = document.getElementById('patientName').value;
-    const age = document.getElementById('patientAge').value;
-    const disease = document.getElementById('patientDisease').value;
-
-    if (!name || !age || !disease) {
-        showToast('Please fill out all fields.', 'error');
-        return;
-    }
-
-    const newPatient = { name, age: parseInt(age), disease };
-
+// Delete patient function
+const deletePatient = id => {
     const transaction = db.transaction(['patients'], 'readwrite');
-    const store = transaction.objectStore('patients');
-    store.add(newPatient);
-
-    transaction.onsuccess = () => {
-        showToast('Patient added successfully!');
-        loadPatients();
-    };
-
-    transaction.onerror = () => {
-        showToast('Error adding patient.', 'error');
-    };
-};
-
-// Delete patient
-const deletePatient = (id) => {
-    const transaction = db.transaction(['patients'], 'readwrite');
-    const store = transaction.objectStore('patients');
-    const request = store.delete(id);
+    const objectStore = transaction.objectStore('patients');
+    const request = objectStore.delete(id);
 
     request.onsuccess = () => {
-        showToast('Patient deleted successfully!');
-        loadPatients();
+        showNotification("Patient deleted successfully.");
+        displayPatients();
     };
 
-    request.onerror = () => {
-        showToast('Patient not found.', 'error');
+    request.onerror = event => {
+        showErrorNotification("Delete patient error: " + event.target.errorCode);
     };
 };
 
-// Export data as JSON
+// Export patient data
 const exportData = () => {
-    const transaction = db.transaction(['patients'], 'readonly');
-    const store = transaction.objectStore('patients');
-    const request = store.getAll();
+    const transaction = db.transaction('patients', 'readonly');
+    const objectStore = transaction.objectStore('patients');
+    const request = objectStore.getAll();
 
-    request.onsuccess = () => {
-        const data = request.result;
-        if (data.length === 0) {
-            showToast('No data to export.', 'error');
-            return;
-        }
-        const jsonBlob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-        const url = URL.createObjectURL(jsonBlob);
-        const a = document.createElement('a');
+    request.onsuccess = event => {
+        const data = event.target.result;
+        const dataStr = JSON.stringify(data);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
         a.href = url;
-        a.download = 'patients_data.json';
+        a.download = "patients_backup.json";
+        document.body.appendChild(a);
         a.click();
-        URL.revokeObjectURL(url);
-        showToast('Data exported successfully!');
+        document.body.removeChild(a);
     };
 
-    request.onerror = () => {
-        showToast('Error exporting data.', 'error');
+    request.onerror = event => {
+        showErrorNotification("Export data error: " + event.target.errorCode);
     };
 };
 
-// Import data from JSON file
-const importData = (event) => {
+// Import patient data
+const importData = event => {
     const file = event.target.files[0];
-
-    if (!file) {
-        showToast('No file selected.', 'error');
-        return;
-    }
-
     const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const data = JSON.parse(e.target.result);
-            if (!Array.isArray(data)) {
-                showToast('Invalid data format. Expected an array of patients.', 'error');
-                return;
-            }
 
-            const transaction = db.transaction(['patients'], 'readwrite');
-            const store = transaction.objectStore('patients');
+    reader.onload = event => {
+        const data = JSON.parse(event.target.result);
+        const transaction = db.transaction('patients', 'readwrite');
+        const objectStore = transaction.objectStore('patients');
+        
+        data.forEach(patient => {
+            objectStore.put(patient);
+        });
+        displayPatients();
+    };
 
-            data.forEach(patient => {
-                store.add(patient);
-            });
-
-            transaction.onsuccess = () => {
-                showToast('Data imported successfully!');
-                loadPatients();
-            };
-
-            transaction.onerror = () => {
-                showToast('Error importing data.', 'error');
-            };
-        } catch (error) {
-            showToast('Error reading file or invalid JSON format.', 'error');
-        }
+    reader.onerror = event => {
+        showErrorNotification("File read error: " + event.target.errorCode);
     };
 
     reader.readAsText(file);
 };
 
-// Initialize the database
-openDatabase();
+// Search patient by name function
+const searchPatient = () => {
+    const name = document.getElementById('searchName').value.toLowerCase();
+    const patientList = document.getElementById('patientList');
+    patientList.innerHTML = '';
+
+    const transaction = db.transaction('patients', 'readonly');
+    const objectStore = transaction.objectStore('patients');
+    const index = objectStore.index('name');
+    const request = index.openCursor();
+
+    request.onsuccess = event => {
+        const cursor = event.target.result;
+        if (cursor) {
+            if (cursor.value.name.toLowerCase().includes(name)) {
+                const listItem = document.createElement('li');
+                listItem.textContent = `Name: ${cursor.value.name}, Age: ${cursor.value.age}, Disease: ${cursor.value.disease}`;
+                patientList.appendChild(listItem);
+            }
+            cursor.continue();
+        } else {
+            if (patientList.innerHTML === '') {
+                showNotification("No patients found with that name.");
+            }
+        }
+    };
+
+    request.onerror = event => {
+        showErrorNotification("Search patient error: " + event.target.errorCode);
+    };
+};
+
+// Delete all patients function
+const deleteAllPatients = () => {
+    const transaction = db.transaction(['patients'], 'readwrite');
+    const objectStore = transaction.objectStore('patients');
+    const request = objectStore.clear();
+
+    request.onsuccess = () => {
+        showNotification("All patients deleted successfully.");
+        document.getElementById('patientList').innerHTML = '';
+    };
+
+    request.onerror = event => {
+        showErrorNotification("Delete patients error: " + event.target.errorCode);
+    };
+};
+
+// Function to show notification
+const showNotification = message => {
+    const notification = document.createElement("div");
+    notification.className = "notification";
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        document.body.removeChild(notification);
+    }, 3000);
+};
+
+// Function to show error notification
+const showErrorNotification = message => {
+    const notification = document.createElement("div");
+    notification.className = "notification error";
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        document.body.removeChild(notification);
+    }, 5000);
+};
+
+// Bind buttons to functions
+document.getElementById('exportButton').addEventListener('click', exportData);
+document.getElementById('importButton').addEventListener('click', () => document.getElementById('importInput').click());
+document.getElementById('importInput').addEventListener('change', importData);
+document.getElementById('deleteAllButton').addEventListener('click', deleteAllPatients);
+document.getElementById('searchButton').addEventListener('click', searchPatient);
+
+// Handle form submission
+document.getElementById('patientForm').addEventListener('submit', addPatient);
