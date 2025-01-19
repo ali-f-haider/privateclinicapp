@@ -4,38 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Management System</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="app-container">
-        <div class="header">
-            <h1>Patient Management System</h1>
-        </div>
-
-        <div id="messageBox" class="message"></div>
-
-        <div class="form-container">
-            <h2>Add New Patient</h2>
-            <input type="text" id="patientName" class="input-field" placeholder="Enter patient's name" />
-            <input type="number" id="patientAge" class="input-field" placeholder="Enter patient's age" />
-            <input type="text" id="patientDisease" class="input-field" placeholder="Enter patient's disease" />
-            <button class="button" onclick="addPatient()">Add Patient</button>
-        </div>
-
-        <div class="patients-container">
-            <h2>Patients List</h2>
-            <ul id="patientsList" class="patients-list"></ul>
-        </div>
-
-        <div class="actions">
-            <button class="button" onclick="exportData()">Export Data</button>
-            <input type="file" id="importFile" class="file-input" accept=".json" onchange="importData(event)" />
-        </div>
+    <div class="container">
+        <h1>Patient Management System</h1>
+        <form id="patientForm">
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="number" id="age" placeholder="Age" required>
+            <input type="text" id="disease" placeholder="Disease" required>
+            <button type="submit" class="button">Add Patient</button>
+        </form>
+        <button id="exportButton" class="button">Export Data</button>
+        <input type="file" id="importInput" class="button" style="display: none;">
+        <button id="importButton" class="button">Import Data</button>
+        <button id="deleteAllButton" class="button">Delete All Patients</button>
+        <input type="text" id="searchName" placeholder="Search by Name" class="button" style="margin-top: 20px;">
+        <button id="searchButton" class="button">Search Patient</button>
+        <h2>Patient List</h2>
+        <ul id="patientList"></ul>
     </div>
-
     <script src="app.js"></script>
+    
     <!-- Toast Container -->
 <div id="toastContainer"></div>
 
 </body>
 </html>
+ 
