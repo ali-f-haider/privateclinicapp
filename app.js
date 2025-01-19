@@ -1,4 +1,6 @@
+// Ensure all DOM content is loaded
 document.addEventListener('DOMContentLoaded', () => {
+
     // IndexedDB setup
     let db;
     const request = indexedDB.open('patientDB', 1);
@@ -45,30 +47,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // Display patients function
     const displayPatients = () => {
         const patientList = document.getElementById('patientList');
-        patientList.innerHTML = '';
+        if (patientList) {
+            patientList.innerHTML = '';
 
-        const transaction = db.transaction('patients', 'readonly');
-        const objectStore = transaction.objectStore('patients');
-        const request = objectStore.openCursor();
+            const transaction = db.transaction('patients', 'readonly');
+            const objectStore = transaction.objectStore('patients');
+            const request = objectStore.openCursor();
 
-        request.onsuccess = event => {
-            const cursor = event.target.result;
-            if (cursor) {
-                const listItem = document.createElement('li');
-                listItem.textContent = `Name: ${cursor.value.name}, Age: ${cursor.value.age}, Disease: ${cursor.value.disease}`;
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = "Delete";
-                deleteButton.className = "button";
-                deleteButton.onclick = () => deletePatient(cursor.value.id);
-                listItem.appendChild(deleteButton);
-                patientList.appendChild(listItem);
-                cursor.continue();
-            }
-        };
+            request.onsuccess = event => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `Name: ${cursor.value.name}, Age: ${cursor.value.age}, Disease: ${cursor.value.disease}`;
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = "Delete";
+                    deleteButton.className = "button";
+                    deleteButton.onclick = () => deletePatient(cursor.value.id);
+                    listItem.appendChild(deleteButton);
+                    patientList.appendChild(listItem);
+                    cursor.continue();
+                }
+            };
 
-        request.onerror = event => {
-            showErrorNotification("Display patients error: " + event.target.errorCode);
-        };
+            request.onerror = event => {
+                showErrorNotification("Display patients error: " + event.target.errorCode);
+            };
+        } else {
+            showErrorNotification("Element 'patientList' not found.");
+        }
     };
 
     // Delete patient function
@@ -138,32 +144,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchPatient = () => {
         const name = document.getElementById('searchName').value.toLowerCase();
         const patientList = document.getElementById('patientList');
-        patientList.innerHTML = '';
+        if (patientList) {
+            patientList.innerHTML = '';
 
-        const transaction = db.transaction('patients', 'readonly');
-        const objectStore = transaction.objectStore('patients');
-        const index = objectStore.index('name');
-        const request = index.openCursor();
+            const transaction = db.transaction('patients', 'readonly');
+            const objectStore = transaction.objectStore('patients');
+            const index = objectStore.index('name');
+            const request = index.openCursor();
 
-        request.onsuccess = event => {
-            const cursor = event.target.result;
-            if (cursor) {
-                if (cursor.value.name.toLowerCase().includes(name)) {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `Name: ${cursor.value.name}, Age: ${cursor.value.age}, Disease: ${cursor.value.disease}`;
-                    patientList.appendChild(listItem);
+            request.onsuccess = event => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    if (cursor.value.name.toLowerCase().includes(name)) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `Name: ${cursor.value.name}, Age: ${cursor.value.age}, Disease: ${cursor.value.disease}`;
+                        patientList.appendChild(listItem);
+                    }
+                    cursor.continue();
+                } else {
+                    if (patientList.innerHTML === '') {
+                        showNotification("No patients found with that name.");
+                    }
                 }
-                cursor.continue();
-            } else {
-                if (patientList.innerHTML === '') {
-                    showNotification("No patients found with that name.");
-                }
-            }
-        };
+            };
 
-        request.onerror = event => {
-            showErrorNotification("Search patient error: " + event.target.errorCode);
-        };
+            request.onerror = event => {
+                showErrorNotification("Search patient error: " + event.target.errorCode);
+            };
+        } else {
+            showErrorNotification("Element 'patientList' not found.");
+        }
     };
 
     // Delete all patients function
@@ -174,7 +184,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         request.onsuccess = () => {
             showNotification("All patients deleted successfully.");
-            document.getElementById('patientList').innerHTML = '';
+            const patientList = document.getElementById('patientList');
+            if (patientList) {
+                patientList.innerHTML = '';
+            }
         };
 
         request.onerror = event => {
@@ -214,5 +227,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('searchButton').addEventListener('click', searchPatient);
 
     // Handle form submission
-    document.getElementById('patientForm').addEventListener('submit', addPatient);
+    const patientForm = document.getElementById('patientForm');
+    if (patientForm) {
+        patientForm.addEventListener('submit', addPatient);
+    } else {
+        showErrorNotification("Element 'patientForm' not found.");
+    }
 });
