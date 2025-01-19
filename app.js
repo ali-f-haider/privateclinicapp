@@ -1,5 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // Function to show notification
+    const showNotification = message => {
+        const notification = document.createElement("div");
+        notification.className = "notification";
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 3000);
+    };
+
+    // Function to show error notification
+    const showErrorNotification = message => {
+        const notification = document.createElement("div");
+        notification.className = "notification error";
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 5000);
+    };
+
     // IndexedDB setup
     let db;
     const request = indexedDB.open('patientDB', 1);
@@ -192,30 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
         request.onerror = event => {
             showErrorNotification("Delete patients error: " + event.target.errorCode);
         };
-    };
-
-    // Function to show notification
-    const showNotification = message => {
-        const notification = document.createElement("div");
-        notification.className = "notification";
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 3000);
-    };
-
-    // Function to show error notification
-    const showErrorNotification = message => {
-        const notification = document.createElement("div");
-        notification.className = "notification error";
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 5000);
     };
 
     // Ensure elements are found before binding events
