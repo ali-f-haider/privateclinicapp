@@ -23,22 +23,21 @@ const openDatabase = () => {
     };
 };
 
-// Function to show message to the user
-const showMessage = (message, type = 'success') => {
-    const messageBox = document.getElementById('messageBox');
-    messageBox.style.display = 'block';
-    messageBox.innerText = message;
+// Function to show toast message
+const showToast = (message, type = 'success') => {
+    const toastContainer = document.getElementById('toastContainer');
+    
+    // Create a new toast element
+    const toast = document.createElement('div');
+    toast.classList.add('toast', type);
+    toast.innerText = message;
 
-    // Apply different styles based on message type
-    if (type === 'success') {
-        messageBox.className = 'message success';
-    } else {
-        messageBox.className = 'message error';
-    }
+    // Append toast to the container
+    toastContainer.appendChild(toast);
 
-    // Hide the message box after a few seconds
+    // Remove the toast after 3 seconds
     setTimeout(() => {
-        messageBox.style.display = 'none';
+        toast.remove();
     }, 3000);
 };
 
@@ -49,7 +48,7 @@ const addPatient = () => {
     const disease = document.getElementById('patientDisease').value;
 
     if (!name || !age || !disease) {
-        showMessage('Please fill out all fields.', 'error');
+        showToast('Please fill out all fields.', 'error');
         return;
     }
 
@@ -60,37 +59,12 @@ const addPatient = () => {
     store.add(newPatient);
 
     transaction.onsuccess = () => {
-        showMessage('Patient added successfully!');
+        showToast('Patient added successfully!');
         loadPatients();
     };
 
     transaction.onerror = () => {
-        showMessage('Error adding patient.', 'error');
-    };
-};
-
-// Load patients from IndexedDB
-const loadPatients = () => {
-    const transaction = db.transaction(['patients'], 'readonly');
-    const store = transaction.objectStore('patients');
-    const request = store.getAll();
-
-    request.onsuccess = () => {
-        const patientsList = document.getElementById('patientsList');
-        patientsList.innerHTML = '';
-
-        request.result.forEach(patient => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span>${patient.name} (Age: ${patient.age}) - ${patient.disease}</span>
-                <button onclick="deletePatient(${patient.id})">Delete</button>
-            `;
-            patientsList.appendChild(li);
-        });
-    };
-
-    request.onerror = () => {
-        showMessage('Error loading patients.', 'error');
+        showToast('Error adding patient.', 'error');
     };
 };
 
@@ -101,12 +75,12 @@ const deletePatient = (id) => {
     const request = store.delete(id);
 
     request.onsuccess = () => {
-        showMessage('Patient deleted successfully!');
+        showToast('Patient deleted successfully!');
         loadPatients();
     };
 
     request.onerror = () => {
-        showMessage('Patient not found.', 'error');
+        showToast('Patient not found.', 'error');
     };
 };
 
@@ -119,7 +93,7 @@ const exportData = () => {
     request.onsuccess = () => {
         const data = request.result;
         if (data.length === 0) {
-            showMessage('No data to export.', 'error');
+            showToast('No data to export.', 'error');
             return;
         }
         const jsonBlob = new Blob([JSON.stringify(data)], { type: 'application/json' });
@@ -129,11 +103,11 @@ const exportData = () => {
         a.download = 'patients_data.json';
         a.click();
         URL.revokeObjectURL(url);
-        showMessage('Data exported successfully!');
+        showToast('Data exported successfully!');
     };
 
     request.onerror = () => {
-        showMessage('Error exporting data.', 'error');
+        showToast('Error exporting data.', 'error');
     };
 };
 
@@ -142,7 +116,7 @@ const importData = (event) => {
     const file = event.target.files[0];
 
     if (!file) {
-        showMessage('No file selected.', 'error');
+        showToast('No file selected.', 'error');
         return;
     }
 
@@ -151,7 +125,7 @@ const importData = (event) => {
         try {
             const data = JSON.parse(e.target.result);
             if (!Array.isArray(data)) {
-                showMessage('Invalid data format. Expected an array of patients.', 'error');
+                showToast('Invalid data format. Expected an array of patients.', 'error');
                 return;
             }
 
@@ -163,15 +137,15 @@ const importData = (event) => {
             });
 
             transaction.onsuccess = () => {
-                showMessage('Data imported successfully!');
+                showToast('Data imported successfully!');
                 loadPatients();
             };
 
             transaction.onerror = () => {
-                showMessage('Error importing data.', 'error');
+                showToast('Error importing data.', 'error');
             };
         } catch (error) {
-            showMessage('Error reading file or invalid JSON format.', 'error');
+            showToast('Error reading file or invalid JSON format.', 'error');
         }
     };
 
