@@ -15,16 +15,18 @@ body {
 
 h1 {
     color: #333;
+    text-align: center;
 }
 
 form {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     margin-bottom: 20px;
 }
 
 form input, form button {
-    flex: 1;
+    flex: 1 1 45%;  /* Adjusts to 45% width */
     padding: 10px;
     margin: 5px;
     border: 1px solid #ccc;
@@ -32,7 +34,7 @@ form input, form button {
 }
 
 form button {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     cursor: pointer;
     background-color: #4CAF50;
     color: white;
@@ -57,6 +59,9 @@ form button {
 #patientList {
     list-style-type: none;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 #patientList li {
@@ -64,9 +69,11 @@ form button {
     margin: 5px 0;
     background-color: #e0e0e0;
     border-radius: 4px;
+    width: 100%;
     display: flex;
-    justify-content: space-between;  /* Added to align the delete button */
-    align-items: center;             /* Center aligns the content */
+    justify-content: space-between;
+    align-items: center;
+    max-width: 90%;
 }
 
 .notification {
@@ -82,4 +89,27 @@ form button {
 
 .notification.error {
     background-color: #f44336;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+    
+    form input, form button {
+        flex: 1 1 100%;  /* Adjusts inputs and buttons to full width on small screens */
+        margin: 5px 0;
+    }
+    
+    .button {
+        width: 100%;
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    #patientList li {
+        padding: 10px;
+        text-align: center;
+        flex-direction: column;
+    }
 }
