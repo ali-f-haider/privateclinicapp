@@ -1,3 +1,4 @@
+document.addEventListener("DOMContentLoaded", () => {
 // IndexedDB setup
 let db;
 const request = indexedDB.open('patientDB', 1);
@@ -214,3 +215,4 @@ document.getElementById('searchButton').addEventListener('click', searchPatient)
 
 // Handle form submission
 document.getElementById('patientForm').addEventListener('submit', addPatient);
+    }
