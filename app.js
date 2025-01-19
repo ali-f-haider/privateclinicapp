@@ -1,4 +1,3 @@
-// Ensure all DOM content is loaded
 document.addEventListener('DOMContentLoaded', () => {
 
     // IndexedDB setup
@@ -219,18 +218,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000);
     };
 
+    // Ensure elements are found before binding events
+    const bindElement = (id, event, callback) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener(event, callback);
+        } else {
+            console.error(`Element '${id}' not found.`);
+            showErrorNotification(`Element '${id}' not found.`);
+        }
+        return element;
+    };
+
     // Bind buttons to functions
-    document.getElementById('exportButton').addEventListener('click', exportData);
-    document.getElementById('importButton').addEventListener('click', () => document.getElementById('importInput').click());
-    document.getElementById('importInput').addEventListener('change', importData);
-    document.getElementById('deleteAllButton').addEventListener('click', deleteAllPatients);
-    document.getElementById('searchButton').addEventListener('click', searchPatient);
+    bindElement('exportButton', 'click', exportData);
+    bindElement('importButton', 'click', () => document.getElementById('importInput').click());
+    bindElement('importInput', 'change', importData);
+    bindElement('deleteAllButton', 'click', deleteAllPatients);
+    bindElement('searchButton', 'click', searchPatient);
 
     // Handle form submission
-    const patientForm = document.getElementById('patientForm');
-    if (patientForm) {
-        patientForm.addEventListener('submit', addPatient);
-    } else {
+    const patientForm = bindElement('patientForm', 'submit', addPatient);
+    if (!patientForm) {
         showErrorNotification("Element 'patientForm' not found.");
     }
 });
