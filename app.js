@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const objectStore = db.createObjectStore('patients', { keyPath: 'id', autoIncrement: true });
         objectStore.createIndex('name', 'name', { unique: false });
     };
-
+ 
     request.onsuccess = function(event) {
         db = event.target.result;
         displayPatients();
