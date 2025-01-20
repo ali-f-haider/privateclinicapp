@@ -1,15 +1,20 @@
-
-document.addEventListener('DOMContentLoaded', () => { // Check if Firebase app is already initialized 
-  if (!firebase.apps.length) { firebase.initializeApp({ apiKey: "AIzaSyA4AwdgDl98iFD4_PA9v1lnAaN3ElEUwQ0",
+document.addEventListener('DOMContentLoaded', () => {
+    if (!firebase.apps.length) {
+        firebase.initializeApp({
+           apiKey: "AIzaSyA4AwdgDl98iFD4_PA9v1lnAaN3ElEUwQ0",
   authDomain: "privateclinicapp.firebaseapp.com",
   projectId: "privateclinicapp",
   storageBucket: "privateclinicapp.firebasestorage.app",
   messagingSenderId: "968128571839",
   appId: "1:968128571839:web:9b2be35bcd414fdf6bd90a",
-  measurementId: "G-J037W4SZHZ" }); } 
-  else { firebase.app(); } 
-  const db = firebase.firestore();
+  measurementId: "G-J037W4SZHZ"
+        });
+    } else {
+        firebase.app();
+    }
     
+    const db = firebase.firestore();
+
     // Function to show notification
     const showNotification = message => {
         const notification = document.createElement("div");
