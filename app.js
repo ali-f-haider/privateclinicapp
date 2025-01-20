@@ -24,24 +24,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000);
     };
 
-    // IndexedDB setup
-    let db;
-    const request = indexedDB.open('patientDB', 1);
-
-    request.onupgradeneeded = function(event) {
-        db = event.target.result;
-        const objectStore = db.createObjectStore('patients', { keyPath: 'id', autoIncrement: true });
-        objectStore.createIndex('name', 'name', { unique: false });
+    // Firebase configuration and initialization
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
     };
- 
-    request.onsuccess = function(event) {
-        db = event.target.result;
-        displayPatients();
-    };
-
-    request.onerror = function(event) {
-        showErrorNotification("Database error: " + event.target.errorCode);
-    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
     // Add patient function
     const addPatient = event => {
@@ -51,18 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const age = parseInt(document.getElementById('age').value);
         const disease = document.getElementById('disease').value;
 
-        const transaction = db.transaction(['patients'], 'readwrite');
-        const objectStore = transaction.objectStore('patients');
-        const request = objectStore.add({ name, age, disease });
-
-        request.onsuccess = () => {
+        db.collection("patients").add({
+            name: name,
+            age: age,
+            disease: disease
+        }).then(() => {
             showNotification(`Patient ${name} added successfully.`);
             displayPatients();
-        };
-
-        request.onerror = event => {
-            showErrorNotification("Add patient error: " + event.target.errorCode);
-        };
+        }).catch(error => {
+            showErrorNotification("Add patient error: " + error.message);
+        });
 
         event.target.reset();
     };
@@ -72,29 +63,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const patientList = document.getElementById('patientList');
         if (patientList) {
             patientList.innerHTML = '';
-
-            const transaction = db.transaction('patients', 'readonly');
-            const objectStore = transaction.objectStore('patients');
-            const request = objectStore.openCursor();
-
-            request.onsuccess = event => {
-                const cursor = event.target.result;
-                if (cursor) {
+            db.collection("patients").get().then(querySnapshot => {
+                querySnapshot.forEach(doc => {
+                    const patient = doc.data();
                     const listItem = document.createElement('li');
-                    listItem.textContent = `Name: ${cursor.value.name}, Age: ${cursor.value.age}, Disease: ${cursor.value.disease}`;
+                    listItem.textContent = `Name: ${patient.name}, Age: ${patient.age}, Disease: ${patient.disease}`;
                     const deleteButton = document.createElement('button');
                     deleteButton.textContent = "Delete";
                     deleteButton.className = "button";
-                    deleteButton.onclick = () => deletePatient(cursor.value.id);
+                    deleteButton.onclick = () => deletePatient(doc.id);
                     listItem.appendChild(deleteButton);
                     patientList.appendChild(listItem);
-                    cursor.continue();
-                }
-            };
-
-            request.onerror = event => {
-                showErrorNotification("Display patients error: " + event.target.errorCode);
-            };
+                });
+            }).catch(error => {
+                showErrorNotification("Display patients error: " + error.message);
+            });
         } else {
             showErrorNotification("Element 'patientList' not found.");
         }
@@ -102,28 +85,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Delete patient function
     const deletePatient = id => {
-        const transaction = db.transaction(['patients'], 'readwrite');
-        const objectStore = transaction.objectStore('patients');
-        const request = objectStore.delete(id);
-
-        request.onsuccess = () => {
+        db.collection("patients").doc(id).delete().then(() => {
             showNotification("Patient deleted successfully.");
             displayPatients();
-        };
-
-        request.onerror = event => {
-            showErrorNotification("Delete patient error: " + event.target.errorCode);
-        };
+        }).catch(error => {
+            showErrorNotification("Delete patient error: " + error.message);
+        });
     };
 
     // Export patient data
     const exportData = () => {
-        const transaction = db.transaction('patients', 'readonly');
-        const objectStore = transaction.objectStore('patients');
-        const request = objectStore.getAll();
-
-        request.onsuccess = event => {
-            const data = event.target.result;
+        db.collection("patients").get().then(querySnapshot => {
+            const data = querySnapshot.docs.map(doc => doc.data());
             const dataStr = JSON.stringify(data);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
@@ -133,11 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-        };
-
-        request.onerror = event => {
-            showErrorNotification("Export data error: " + event.target.errorCode);
-        };
+        }).catch(error => {
+            showErrorNotification("Export data error: " + error.message);
+        });
     };
 
     // Import patient data
@@ -147,17 +118,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         reader.onload = event => {
             const data = JSON.parse(event.target.result);
-            const transaction = db.transaction('patients', 'readwrite');
-            const objectStore = transaction.objectStore('patients');
-            
-            data.forEach(patient => {
-                objectStore.put(patient);
+            db.collection("patients").get().then(querySnapshot => {
+                const batch = db.batch();
+                querySnapshot.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                data.forEach(patient => {
+                    batch.set(db.collection("patients").doc(), patient);
+                });
+                return batch.commit();
+            }).then(() => {
+                showNotification("Patient data imported successfully.");
+                displayPatients();
+            }).catch(error => {
+                showErrorNotification("Import data error: " + error.message);
             });
-            displayPatients();
         };
 
-        reader.onerror = event => {
-            showErrorNotification("File read error: " + event.target.errorCode);
+        reader.onerror = error => {
+            showErrorNotification("File read error: " + error.message);
         };
 
         reader.readAsText(file);
@@ -170,30 +149,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (patientList) {
             patientList.innerHTML = '';
 
-            const transaction = db.transaction('patients', 'readonly');
-            const objectStore = transaction.objectStore('patients');
-            const index = objectStore.index('name');
-            const request = index.openCursor();
-
-            request.onsuccess = event => {
-                const cursor = event.target.result;
-                if (cursor) {
-                    if (cursor.value.name.toLowerCase().includes(name)) {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = `Name: ${cursor.value.name}, Age: ${cursor.value.age}, Disease: ${cursor.value.disease}`;
-                        patientList.appendChild(listItem);
-                    }
-                    cursor.continue();
-                } else {
-                    if (patientList.innerHTML === '') {
-                        showNotification("No patients found with that name.");
-                    }
+            db.collection("patients").orderBy("name").startAt(name).endAt(name + "\uf8ff").get().then(querySnapshot => {
+                querySnapshot.forEach(doc => {
+                    const patient = doc.data();
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `Name: ${patient.name}, Age: ${patient.age}, Disease: ${patient.disease}`;
+                    patientList.appendChild(listItem);
+                });
+                if (patientList.innerHTML === '') {
+                    showNotification("No patients found with that name.");
                 }
-            };
-
-            request.onerror = event => {
-                showErrorNotification("Search patient error: " + event.target.errorCode);
-            };
+            }).catch(error => {
+                showErrorNotification("Search patient error: " + error.message);
+            });
         } else {
             showErrorNotification("Element 'patientList' not found.");
         }
@@ -201,21 +169,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Delete all patients function
     const deleteAllPatients = () => {
-        const transaction = db.transaction(['patients'], 'readwrite');
-        const objectStore = transaction.objectStore('patients');
-        const request = objectStore.clear();
-
-        request.onsuccess = () => {
+        db.collection("patients").get().then(querySnapshot => {
+            const batch = db.batch();
+            querySnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            return batch.commit();
+        }).then(() => {
             showNotification("All patients deleted successfully.");
             const patientList = document.getElementById('patientList');
             if (patientList) {
                 patientList.innerHTML = '';
             }
-        };
-
-        request.onerror = event => {
-            showErrorNotification("Delete patients error: " + event.target.errorCode);
-        };
+        }).catch(error => {
+            showErrorNotification("Delete patients error: " + error.message);
+        });
     };
 
     // Ensure elements are found before binding events
@@ -239,4 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle form submission
     bindElement('patientForm', 'submit', addPatient);
+
+    // Load initial patient data from server
+    displayPatients();
 });
