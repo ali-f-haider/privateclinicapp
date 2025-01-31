@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facharztprüfung Fragen</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            resize: vertical;
+            min-height: 50px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .add-question {
+            background: #28a745;
+        }
+        .add-question:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Facharztprüfung Fragen</h1>
+        <form id="questionsForm" onsubmit="redirectToPage3(event)">
+            <div id="questions">
+                <div class="form-group">
+                    <label for="frage1">Frage 1</label>
+                    <textarea id="frage1" name="frage1"></textarea>
+                </div>
+            </div>
+            <button type="button" class="add-question" onclick="addQuestion()">Eine Frage ergänzen</button>
+            <button type="submit">Fragen abschließen</button>
+        </form>
+    </div>
+    <script>
+        let questionCount = 1;
+        function addQuestion() {
+            questionCount++;
+            const questionsDiv = document.getElementById('questions');
+            const newQuestionDiv = document.createElement('div');
+            newQuestionDiv.classList.add('form-group');
+            newQuestionDiv.innerHTML = `
+                <label for="frage${questionCount}">Frage ${questionCount}</label>
+                <textarea id="frage${questionCount}" name="frage${questionCount}"></textarea>
+            `;
+            questionsDiv.appendChild(newQuestionDiv);
+        }
+
+        function redirectToPage3(event) {
+            event.preventDefault(); // Verhindert das Standardformularverhalten
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const name = urlParams.get('name');
+            const arbeitsstelle = urlParams.get('arbeitsstelle');
+            const bundesland = urlParams.get('bundesland');
+            const arztkammer = urlParams.get('arztkammer');
+            const prufungsjahr = urlParams.get('prufungsjahr');
+
+            const form = document.getElementById('questionsForm');
+            const formData = new FormData(form);
+            const questions = [];
+            formData.forEach((value, key) => {
+                questions.push(`${key}: ${value}`);
+            });
+
+            const queryString = new URLSearchParams({
+                name: name,
+                arbeitsstelle: arbeitsstelle,
+                bundesland: bundesland,
+                arztkammer: arztkammer,
+                prufungsjahr: prufungsjahr,
+                questions: questions.join(', ')
+            }).toString();
+
+            window.location.href = `seite3.html?${queryString}`;
+        }
+    </script>
+</body>
+</html>

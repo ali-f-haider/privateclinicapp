@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zusätzliche Informationen</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="email"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+  
+<script type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+</script>
+<script type="text/javascript">
+   (function(){
+      emailjs.init({
+        publicKey: "hSpwOsLVYtxDu_VUU",
+      });
+   })();
+ </script>
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>Zusätzliche Informationen</h1>
+        <form id="finalForm" onsubmit="sendEmail(event)">
+            <div class="form-group">
+                <label for="email">E-Mail</label>
+                <input type="email" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="mention_name" name="mention_name">
+                    Ich stimme zu, dass mein Name im Buch erwähnt wird.
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="email_response" name="email_response">
+                    Ich möchte meine Antworten per E-Mail erhalten.
+                </label>
+            </div>
+            <button type="submit">Abschließen</button>
+        </form>
+        <div id="notification" style="display:none; margin-top:20px; color:green;">Der Bericht wurde erfolgreich gesendet!</div>
+    </div>
+    <script>
+        function sendEmail(event) {
+            event.preventDefault(); // Verhindert das Standardformularverhalten
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const name = urlParams.get('name');
+            const arbeitsstelle = urlParams.get('arbeitsstelle');
+            const bundesland = urlParams.get('bundesland');
+            const arztkammer = urlParams.get('arztkammer');
+            const prufungsjahr = urlParams.get('prufungsjahr');
+            const questions = urlParams.get('questions');
+
+            const email = document.getElementById('email').value || 'kein E-Mail angegeben';
+            const mentionName = document.getElementById('mention_name').checked ? 'Ja' : 'Nein';
+            const emailResponse = document.getElementById('email_response').checked ? 'Ja' : 'Nein';
+
+            const message = `
+                Name: ${name || 'kein Name angegeben'}\n
+                Arbeitsstelle: ${arbeitsstelle || 'keine Arbeitsstelle angegeben'}\n
+                Bundesland: ${bundesland || 'kein Bundesland angegeben'}\n
+                Ärztekammer: ${arztkammer || 'keine Ärztekammer angegeben'}\n
+                Prüfungsjahr: ${prufungsjahr || 'kein Prüfungsjahr angegeben'}\n
+                Fragen: ${questions || 'keine Fragen angegeben'}\n
+                E-Mail: ${email}\n
+                Name im Buch erwähnt: ${mentionName}\n
+                Antworten per E-Mail erhalten: ${emailResponse}
+            `;
+
+            const templateParams = {
+                to_email: email,
+                from_name: name || 'kein Name angegeben',
+                message: message
+            };
+
+            emailjs.send('service_k0521yr', 'template_brazevj', templateParams)
+                .then(function(response) {
+                    document.getElementById('notification').style.display = 'block';
+                    console.log('SUCCESS!', response.status, response.text);
+                }, function(error) {
+                    console.error('FAILED...', error);
+                });
+        }
+    </script>
+</body>
+</html>

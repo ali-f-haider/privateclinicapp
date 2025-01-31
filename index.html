@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facharztprüfung Erfahrungen</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Facharztprüfung Erfahrungen</h1>
+        <form action="seite2.html" method="GET">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name">
+            </div>
+            <div class="form-group">
+                <label for="arbeitsstelle">Arbeitsstelle</label>
+                <input type="text" id="arbeitsstelle" name="arbeitsstelle">
+            </div>
+            <div class="form-group">
+                <label for="bundesland">Bundesland</label>
+                <select id="bundesland" name="bundesland">
+                    <option value="">Wählen Sie ein Bundesland</option>
+                    <!-- Hier kannst du alle Bundesländer hinzufügen -->
+                    <option value="Baden-Württemberg">Baden-Württemberg</option>
+                    <!-- Weitere Optionen -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="arztkammer">Ärztekammer</label>
+                <select id="arztkammer" name="arztkammer">
+                    <option value="">Wählen Sie eine Ärztekammer</option>
+                    <!-- Hier kannst du alle Ärztekammern hinzufügen -->
+                    <option value="Ärztekammer Baden-Württemberg">Ärztekammer Baden-Württemberg</option>
+                    <!-- Weitere Optionen -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="prufungsjahr">Prüfungsjahr</label>
+                <input type="text" id="prufungsjahr" name="prufungsjahr">
+            </div>
+            <button type="submit">Weiter</button>
+        </form>
+    </div>
+</body>
+</html>
