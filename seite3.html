@@ -54,7 +54,18 @@
     <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
     <script type="text/javascript">
        (function(){
-          emailjs.init("hSpwOsLVYtxDu_VUU");
+          emailjs.init({
+            publicKey: 'hSpwOsLVYtxDu_VUU',
+            blockHeadless: true,
+            blockList: {
+                list: ['foo@emailjs.com', 'bar@emailjs.com'],
+                watchVariable: 'userEmail',
+            },
+            limitRate: {
+                id: 'app',
+                throttle: 10000,
+            },
+          });
        })();
     </script>
 </head>
@@ -111,7 +122,7 @@
             `;
 
             const templateParams = {
-                to_email: 'ali_f_haider@hotmail.com', // Ersetze diese Email mit deiner eigenen E-Mail-Adresse
+                to_email: 'deine-feste-email@example.com', // Ersetze diese Email mit deiner eigenen E-Mail-Adresse
                 from_name: name || 'kein Name angegeben',
                 message: message
             };
