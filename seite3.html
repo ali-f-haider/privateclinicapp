@@ -51,19 +51,12 @@
             background: #0056b3;
         }
     </style>
-  
-<script type="text/javascript"
-        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
-</script>
-<script type="text/javascript">
-   (function(){
-      emailjs.init({
-        publicKey: "hSpwOsLVYtxDu_VUU",
-      });
-   })();
- </script>
-
-
+    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script type="text/javascript">
+       (function(){
+          emailjs.init("hSpwOsLVYtxDu_VUU");
+       })();
+    </script>
 </head>
 <body>
     <div class="container">
@@ -127,6 +120,15 @@
                 .then(function(response) {
                     document.getElementById('notification').style.display = 'block';
                     console.log('SUCCESS!', response.status, response.text);
+
+                    // Wenn der Benutzer möchte, dass die Antworten per E-Mail erhalten werden, eine zusätzliche E-Mail senden
+                    if (emailResponse === 'Ja') {
+                        emailjs.send('service_k0521yr', 'template_brazevj', {
+                            to_email: email, // Wiederholung der E-Mail-Adresse für den Fall, dass sie anders ist
+                            from_name: name || 'kein Name angegeben',
+                            message: message
+                        });
+                    }
                 }, function(error) {
                     console.error('FAILED...', error);
                 });
