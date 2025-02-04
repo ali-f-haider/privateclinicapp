@@ -54,18 +54,7 @@
     <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
     <script type="text/javascript">
        (function(){
-          emailjs.init({
-            publicKey: 'hSpwOsLVYtxDu_VUU',
-            blockHeadless: true,
-            blockList: {
-                list: ['foo@emailjs.com', 'bar@emailjs.com'],
-                watchVariable: 'userEmail',
-            },
-            limitRate: {
-                id: 'app',
-                throttle: 10000,
-            },
-          });
+          emailjs.init({publicKey: 'hSpwOsLVYtxDu_VUU'});
        })();
     </script>
 </head>
