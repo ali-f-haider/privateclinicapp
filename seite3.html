@@ -54,10 +54,7 @@
     <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
     <script type="text/javascript">
        (function(){
-          emailjs.init({
-              publicKey: 'DCWuS8v_R5SwWKLbL',
-              // Additional configurations if needed
-          });
+          emailjs.init("DCWuS8v_R5SwWKLbL");
        })();
     </script>
 </head>
@@ -103,11 +100,11 @@
 
             const message = `
                 Name: ${name || 'kein Name angegeben'}\n
-                Arbeitsstelle: ${arbeitsstelle || 'keine Arbeitsstelle angegeben'}\n
-                Bundesland: ${bundesland || 'kein Bundesland angegeben'}\n
-                Ärztekammer: ${arztkammer || 'keine Ärztekammer angegeben'}\n
-                Prüfungsjahr: ${prufungsjahr || 'kein Prüfungsjahr angegeben'}\n
-                Fragen: ${questions || 'keine Fragen angegeben'}\n
+                Arbeitsstelle: ${arbeitsstelle oder 'keine Arbeitsstelle angegeben'}\n
+                Bundesland: ${bundesland oder 'kein Bundesland angegeben'}\n
+                Ärztekammer: ${arztkammer oder 'keine Ärztekammer angegeben'}\n
+                Prüfungsjahr: ${prufungsjahr oder 'kein Prüfungsjahr angegeben'}\n
+                Fragen: ${questions oder 'keine Fragen angegeben'}\n
                 E-Mail: ${email}\n
                 Name im Buch erwähnt: ${mentionName}\n
                 Antworten per E-Mail erhalten: ${emailResponse}
@@ -123,19 +120,6 @@
                 .then(function(response) {
                     document.getElementById('notification').style.display = 'block';
                     console.log('SUCCESS!', response.status, response.text);
-
-                    // Wenn der Benutzer möchte, dass die Antworten per E-Mail erhalten werden, eine zusätzliche E-Mail an den Benutzer senden
-                    if (emailResponse === 'Ja') {
-                        emailjs.send('service_k0521yr', 'template_brazevj', {
-                            to_email: email, // E-Mail-Adresse des Benutzers
-                            from_name: name || 'kein Name angegeben',
-                            message: message
-                        }).then(function(response) {
-                            console.log('SUCCESS!', response.status, response.text);
-                        }, function(error) {
-                            console.error('FAILED...', error);
-                        });
-                    }
                 }, function(error) {
                     console.error('FAILED...', error);
                 });
