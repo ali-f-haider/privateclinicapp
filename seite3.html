@@ -111,7 +111,7 @@
             `;
 
             const templateParams = {
-                to_email: email,
+                to_email: 'deine-feste-email@example.com', // Ersetze diese Email mit deiner eigenen E-Mail-Adresse
                 from_name: name || 'kein Name angegeben',
                 message: message
             };
@@ -121,12 +121,16 @@
                     document.getElementById('notification').style.display = 'block';
                     console.log('SUCCESS!', response.status, response.text);
 
-                    // Wenn der Benutzer möchte, dass die Antworten per E-Mail erhalten werden, eine zusätzliche E-Mail senden
+                    // Wenn der Benutzer möchte, dass die Antworten per E-Mail erhalten werden, eine zusätzliche E-Mail an den Benutzer senden
                     if (emailResponse === 'Ja') {
                         emailjs.send('service_k0521yr', 'template_brazevj', {
-                            to_email: email, // Wiederholung der E-Mail-Adresse für den Fall, dass sie anders ist
+                            to_email: email, // E-Mail-Adresse des Benutzers
                             from_name: name || 'kein Name angegeben',
                             message: message
+                        }).then(function(response) {
+                            console.log('SUCCESS!', response.status, response.text);
+                        }, function(error) {
+                            console.error('FAILED...', error);
                         });
                     }
                 }, function(error) {
