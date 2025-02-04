@@ -51,15 +51,18 @@
             background: #0056b3;
         }
     </style>
-<script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
-<script type="text/javascript">
-   (function(){
-      emailjs.init({
+    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script type="text/javascript">
+       (function(){
+       //   emailjs.init("DCWuS8v_R5SwWKLbL");
+      // })();
+             emailjs.init({
          publicKey: 'DCWuS8v_R5SwWKLbL'
       });
-   })();
-</script>
+    </script>
+  
 
+    
 </head>
 <body>
     <div class="container">
@@ -103,18 +106,18 @@
 
             const message = `
                 Name: ${name || 'kein Name angegeben'}\n
-                Arbeitsstelle: ${arbeitsstelle oder 'keine Arbeitsstelle angegeben'}\n
-                Bundesland: ${bundesland oder 'kein Bundesland angegeben'}\n
-                Ärztekammer: ${arztkammer oder 'keine Ärztekammer angegeben'}\n
-                Prüfungsjahr: ${prufungsjahr oder 'kein Prüfungsjahr angegeben'}\n
-                Fragen: ${questions oder 'keine Fragen angegeben'}\n
+                Arbeitsstelle: ${arbeitsstelle || 'keine Arbeitsstelle angegeben'}\n
+                Bundesland: ${bundesland || 'kein Bundesland angegeben'}\n
+                Ärztekammer: ${arztkammer || 'keine Ärztekammer angegeben'}\n
+                Prüfungsjahr: ${prufungsjahr || 'kein Prüfungsjahr angegeben'}\n
+                Fragen: ${questions || 'keine Fragen angegeben'}\n
                 E-Mail: ${email}\n
                 Name im Buch erwähnt: ${mentionName}\n
                 Antworten per E-Mail erhalten: ${emailResponse}
             `;
 
             const templateParams = {
-                to_email: 'ali_f_haider@hotmail.com', // Ersetze diese Email mit deiner eigenen E-Mail-Adresse
+                to_email: email,
                 from_name: name || 'kein Name angegeben',
                 message: message
             };
