@@ -104,28 +104,4 @@
                 Name: ${name || 'kein Name angegeben'}\n
                 Arbeitsstelle: ${arbeitsstelle || 'keine Arbeitsstelle angegeben'}\n
                 Bundesland: ${bundesland || 'kein Bundesland angegeben'}\n
-                Ärztekammer: ${arztkammer || 'keine Ärztekammer angegeben'}\n
-                Prüfungsjahr: ${prufungsjahr || 'kein Prüfungsjahr angegeben'}\n
-                Fragen: ${questions || 'keine Fragen angegeben'}\n
-                E-Mail: ${email}\n
-                Name im Buch erwähnt: ${mentionName}\n
-                Antworten per E-Mail erhalten: ${emailResponse}
-            `;
-
-            const templateParams = {
-                to_email: email,
-                from_name: name || 'kein Name angegeben',
-                message: message
-            };
-
-            emailjs.send('service_k0521yr', 'template_brazevj', templateParams)
-                .then(function(response) {
-                    document.getElementById('notification').style.display = 'block';
-                    console.log('SUCCESS!', response.status, response.text);
-                }, function(error) {
-                    console.error('FAILED...', error);
-                });
-        }
-    </script>
-</body>
-</html>
+                Ärztekammer: ${
